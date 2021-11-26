@@ -1,3 +1,9 @@
+var current_time = {
+    year: 2011,
+    month: "05"
+};
+var selected_value = "Discrete.Oxygen";
+
 var img_x = 3865;
 var img_y = 3865;
 var station_location = {
@@ -154,9 +160,9 @@ var bounds = [253700, 6637800, 273800, 6663700], // UTM 33N left, bottom, right,
     xCells = boundsWidth / cellSize,
     yCells = boundsHeight / cellSize,
     sceneWidth = 100,
-    sceneHeight = 100 * (boundsHeight / boundsWidth),
+    sceneHeight = 100,
     boxSize = sceneWidth / xCells,
-    valueFactor = 0.02,
+    valueFactor = 0.1,
     width  = window.innerWidth,
     height = window.innerHeight;
 
@@ -201,14 +207,35 @@ function render() {
 
 render();
 
-var csv = d3.dsv(' ', 'text/plain');
+var csv = d3.dsv(',', 'text/plain');
 
-function spawnBars() {
+function organizeData(data) {
+    return new Promise(function(resolve, reject) {
+        var organizedBins = {};
+        for(var i = 0; i < data.length; i++) {
+            //Initializing bin for station
+            var currentStationNumber = data[i]["Station.Number"];
+            if(currentStationNumber && !organizedBins[currentStationNumber]) {
+                organizedBins[currentStationNumber] = [];
+            }
+            //Pushing the data to the bin
+            organizedBins[currentStationNumber].push(data[i]);
+        }
+        resolve(organizedBins);
+    });
+}
+
+function spawnBars(data) {
     for (var key in station_location) {
         if (!station_location.hasOwnProperty(key)) {
             continue;
         }
-        var value = Math.floor(Math.random() * 100); 
+        var currentDataPoint = getDataPointForDate(data[key+".0"]);
+        var value = 0;
+        if(currentDataPoint) {
+            value = currentDataPoint[selected_value];
+        }
+
         var geometry = new THREE.BoxGeometry(boxSize, boxSize, value * valueFactor);
     
         var material = new THREE.MeshBasicMaterial({
@@ -224,26 +251,21 @@ function spawnBars() {
     }
 }
 
-spawnBars();
+function getDataPointForDate(dataSeries) {
+    for (var key in dataSeries) {
+        if (dataSeries.hasOwnProperty(key)) {
+            var dataPoint = dataSeries[key];
+            if(dataPoint["MonthYear"] == ""+current_time.year+"-"+current_time.month) {
+                return dataPoint;
+            }
+        }
+    }
+}
 
-// csv('data/Oslo_bef_100m_2015.csv').get(function(error, data) { // ru250m_2015.csv
-//     for (var i = 0; i < data.length; i++) {
-//         var id = data[i].rute_100m,
-//             utmX = parseInt(id.substring(0, 7)) - 2000000 + cellSize, // First seven digits minus false easting
-//             utmY = parseInt(id.substring(7, 14)) + cellSize, // Last seven digits
-//             sceneX = (utmX - bounds[0]) / (boundsWidth / sceneWidth) - sceneWidth / 2,
-//             sceneY = (utmY - bounds[1]) / (boundsHeight / sceneHeight) - sceneHeight / 2,
-//             value = parseInt(data[i].sum);
-
-//         var geometry = new THREE.BoxGeometry(boxSize, boxSize, value * valueFactor);
-
-//         var material = new THREE.MeshPhongMaterial({
-//             color: colorScale(value)
-//         });
-
-//         var cube = new THREE.Mesh(geometry, material);
-//         cube.position.set(sceneX, sceneY, value * valueFactor / 2);
-
-//         scene.add(cube);
-//     }
-// });
+csv('data/sf_mean_by_month.csv').get(function(error, data) {
+    if(!error) {
+        organizeData(data).then(spawnBars);
+    } else {
+        console.error("Could not load or parse 'data/sf_mean_by_month.csv': " + error);
+    }
+});
