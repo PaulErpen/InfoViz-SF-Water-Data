@@ -3,14 +3,18 @@ import React, { useState } from "react";
 import ThreeDMap from './Components/ThreeDMap';
 
 const MapVisualization = () => {
-    const [currentTime, setCurrentTime] = useState({
+    let currentTime = {
         year: 2011,
-        month: "05"
-    });
+        month: 5
+    };
+    const getCurrentTime = () => {
+        let optionalZero = currentTime.month < 10 ? "0" : "";
+        return ""+currentTime.year+"-"+optionalZero+currentTime.month;
+    }
     const [selectedValue, setSelectedValue] = useState("Discrete.Oxygen");
 
     return <div>
-        <ThreeDMap currentTime={currentTime} selectedValue={selectedValue}/>
+        <ThreeDMap getCurrentTime={getCurrentTime} selectedValue={selectedValue}/>
     </div>
 }
 window.addEventListener("load", () => {

@@ -115,7 +115,7 @@ const ThreeDMap = (props) => {
         for (var key in dataSeries) {
             if (dataSeries.hasOwnProperty(key)) {
                 var dataPoint = dataSeries[key];
-                if(dataPoint["MonthYear"] == ""+props.currentTime.year+"-"+props.currentTime.month) {
+                if(dataPoint["MonthYear"] == props.getCurrentTime()) {
                     return dataPoint;
                 }
             }
