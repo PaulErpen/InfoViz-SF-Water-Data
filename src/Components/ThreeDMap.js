@@ -1,9 +1,16 @@
 import React, { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import stationLocations from "./StationLocations";
 
 const ThreeDMap = (props) => { 
     const threeDViewRef = useRef(null);
-    
+    const currentTime = useSelector(state => {
+        let optionalZero = state.currentTime.month < 10 ? "0" : "";
+        return ""+state.currentTime.year+"-"+optionalZero+state.currentTime.month;
+    });
+    const selectedValue = useSelector(state => state.selectedValue);
+    const dispatch = useDispatch();
+
     const img_x = 3865;
     const img_y = 3865;
     
@@ -16,9 +23,7 @@ const ThreeDMap = (props) => {
         sceneWidth = 100,
         sceneHeight = 100,
         boxSize = sceneWidth / xCells,
-        valueFactor = 0.1,
-        width  = window.innerWidth,
-        height = window.innerHeight;
+        valueFactor = 0.1;
     
     const colorScale = d3.scale.linear()
         .domain([0, 100, 617])
@@ -31,8 +36,8 @@ const ThreeDMap = (props) => {
     }
     
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 20, width / height, 0.1, 1000 );
-    const controls = new THREE.TrackballControls(camera);
+    let camera;
+    let controls;
     const renderer = new THREE.WebGLRenderer();
     const geometry = new THREE.PlaneGeometry(sceneWidth, sceneHeight, 1, 1),
         material = new THREE.MeshBasicMaterial(),
@@ -41,12 +46,16 @@ const ThreeDMap = (props) => {
     const ambLight = new THREE.AmbientLight(0x777777);
     const dirLight = new THREE.DirectionalLight(0xcccccc, 1);
     
-    
     useEffect(() => {
         initialize3DView();
     });
 
     const initialize3DView = () => {
+        let width  = threeDViewRef.current.offsetWidth;
+        let height = threeDViewRef.current.offsetHeight;
+        camera = new THREE.PerspectiveCamera( 20, width / height, 0.1, 1000 );
+        controls = new THREE.TrackballControls(camera);
+        
         camera.position.set(0, -200, 120);
         renderer.setSize(width, height);
         threeDViewRef.current.appendChild(renderer.domElement);
@@ -72,6 +81,7 @@ const ThreeDMap = (props) => {
     const organizeData = (data) => {
         return new Promise(function(resolve, reject) {
             var organizedBins = {};
+            var years = new Set();
             for(var i = 0; i < data.length; i++) {
                 //Initializing bin for station
                 var currentStationNumber = data[i]["Station.Number"];
@@ -80,7 +90,16 @@ const ThreeDMap = (props) => {
                 }
                 //Pushing the data to the bin
                 organizedBins[currentStationNumber].push(data[i]);
+
+                //collecting years
+                if(data[i]["MonthYear"]) {
+                    years.add(data[i]["MonthYear"].slice(0,4));
+                }
             }
+            dispatch({
+                type: "yearRange/set",
+                payload: Array.from(years)
+            });
             resolve(organizedBins);
         });
     }
@@ -93,7 +112,7 @@ const ThreeDMap = (props) => {
             var currentDataPoint = getDataPointForDate(data[key+".0"]);
             var value = 0;
             if(currentDataPoint) {
-                value = currentDataPoint[props.selectedValue];
+                value = currentDataPoint[selectedValue];
             }
     
             var geometry = new THREE.BoxGeometry(boxSize, boxSize, value * valueFactor);
@@ -115,7 +134,7 @@ const ThreeDMap = (props) => {
         for (var key in dataSeries) {
             if (dataSeries.hasOwnProperty(key)) {
                 var dataPoint = dataSeries[key];
-                if(dataPoint["MonthYear"] == props.getCurrentTime()) {
+                if(dataPoint["MonthYear"] == currentTime) {
                     return dataPoint;
                 }
             }
