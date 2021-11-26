@@ -144,8 +144,9 @@ const ThreeDMap = (props) => {
             var cube = new THREE.Mesh(geometry, material);
             var sceneX = stationLocations[key].x / img_x * sceneWidth - sceneWidth *0.5;
             var sceneY = (img_y - stationLocations[key].y) / img_y * sceneHeight - sceneHeight *0.5;
-            cube.position.set(sceneX, sceneY, value * valueFactor / 2);
-        
+            cube.position.set(sceneX, sceneY, 0);
+            cube.scale.z = value * valueFactor;
+
             scene.add(cube);
             barsByStation[key] = cube;
         }
@@ -162,7 +163,7 @@ const ThreeDMap = (props) => {
                 value = currentDataPoint[selectedValue];
             }
             let currentBar = barsByStation[key];
-            currentBar.position.set(currentBar.position.x, currentBar.position.y, value * valueFactor / 2);
+            currentBar.scale.z = value * valueFactor;
         }
     }
     
