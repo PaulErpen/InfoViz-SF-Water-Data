@@ -6,4 +6,29 @@
         width: 100vw;
         height: calc(100vh - 200px); 
     }
+
+    .time-line-wrapper {
+        padding: 40px;
+
+        .time-line {
+            display: block;
+            position: relative;
+            width: calc(100vw - 80px);
+            height: 50px;
+            background: red;
+
+            .time-line-slider {
+                position: absolute;
+                display: block;
+                height: 50px;
+                width: 20px;
+                background: green;
+            }
+        }
+
+        .year-indicators {
+            display: flex;
+            justify-content: space-between;
+        }
+    }
 }

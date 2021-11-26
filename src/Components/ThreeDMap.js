@@ -2,18 +2,28 @@ import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import stationLocations from "./StationLocations";
 
-const ThreeDMap = (props) => { 
-    const threeDViewRef = useRef(null);
+const ReadCurrentTimeSubcomponent = () => {
     const currentTime = useSelector(state => {
         let optionalZero = state.currentTime.month < 10 ? "0" : "";
         return ""+state.currentTime.year+"-"+optionalZero+state.currentTime.month;
     });
+    return <span id="current-time-subcomp" data-current-time={""+currentTime}></span>
+}
+
+const ThreeDMap = (props) => {
+    let organizedData;
+    let lastDate;
+
+    const threeDViewRef = useRef(null);
+    
     const selectedValue = useSelector(state => state.selectedValue);
     const dispatch = useDispatch();
 
     const img_x = 3865;
     const img_y = 3865;
     
+    const barsByStation = {};
+
     const bounds = [253700, 6637800, 273800, 6663700], // UTM 33N left, bottom, right, top
         boundsWidth = bounds[2] - bounds[0],
         boundsHeight = bounds[3] - bounds[1],
@@ -23,7 +33,7 @@ const ThreeDMap = (props) => {
         sceneWidth = 100,
         sceneHeight = 100,
         boxSize = sceneWidth / xCells,
-        valueFactor = 0.1;
+        valueFactor = 0.5;
     
     const colorScale = d3.scale.linear()
         .domain([0, 100, 617])
@@ -31,6 +41,12 @@ const ThreeDMap = (props) => {
 
     const render = () => {
         controls.update();
+        if(!lastDate) {
+            lastDate = document.getElementById("current-time-subcomp").dataset["currentTime"];
+        } else if(lastDate != document.getElementById("current-time-subcomp").dataset["currentTime"]) {
+            lastDate = document.getElementById("current-time-subcomp").dataset["currentTime"];
+            scaleBars();
+        }
         requestAnimationFrame(render);
         renderer.render(scene, camera);
     }
@@ -51,14 +67,15 @@ const ThreeDMap = (props) => {
     });
 
     const initialize3DView = () => {
-        let width  = threeDViewRef.current.offsetWidth;
-        let height = threeDViewRef.current.offsetHeight;
+        let viewWrapper = threeDViewRef.current;
+        let width  = viewWrapper.offsetWidth;
+        let height = viewWrapper.offsetHeight;
         camera = new THREE.PerspectiveCamera( 20, width / height, 0.1, 1000 );
-        controls = new THREE.TrackballControls(camera);
+        controls = new THREE.TrackballControls(camera, viewWrapper);
         
         camera.position.set(0, -200, 120);
         renderer.setSize(width, height);
-        threeDViewRef.current.appendChild(renderer.domElement);
+        viewWrapper.appendChild(renderer.domElement);
         textureLoader.load('img/HighResSFBay_Rotate.png', function(texture) {
             material.map = texture;
             scene.add(plane);
@@ -70,7 +87,10 @@ const ThreeDMap = (props) => {
         var csv = d3.dsv(',', 'text/plain');
         csv('data/sf_mean_by_month.csv').get(function(error, data) {
             if(!error) {
-                organizeData(data).then(spawnBars);
+                organizeData(data).then(processedData => {
+                    organizedData = processedData;
+                    spawnBars(organizedData);
+                });
             } else {
                 console.error("Could not load or parse 'data/sf_mean_by_month.csv': " + error);
             }
@@ -81,7 +101,7 @@ const ThreeDMap = (props) => {
     const organizeData = (data) => {
         return new Promise(function(resolve, reject) {
             var organizedBins = {};
-            var years = new Set();
+            var months = new Set();
             for(var i = 0; i < data.length; i++) {
                 //Initializing bin for station
                 var currentStationNumber = data[i]["Station.Number"];
@@ -91,14 +111,14 @@ const ThreeDMap = (props) => {
                 //Pushing the data to the bin
                 organizedBins[currentStationNumber].push(data[i]);
 
-                //collecting years
+                //collecting yearMonthRange
                 if(data[i]["MonthYear"]) {
-                    years.add(data[i]["MonthYear"].slice(0,4));
+                    months.add(data[i]["MonthYear"]);
                 }
             }
             dispatch({
-                type: "yearRange/set",
-                payload: Array.from(years)
+                type: "yearMonthRange/set",
+                payload: Array.from(months)
             });
             resolve(organizedBins);
         });
@@ -127,6 +147,22 @@ const ThreeDMap = (props) => {
             cube.position.set(sceneX, sceneY, value * valueFactor / 2);
         
             scene.add(cube);
+            barsByStation[key] = cube;
+        }
+    }
+
+    const scaleBars = () => {
+        for (var key in stationLocations) {
+            if (!stationLocations.hasOwnProperty(key)) {
+                continue;
+            }
+            var currentDataPoint = getDataPointForDate(organizedData[key+".0"]);
+            var value = 0;
+            if(currentDataPoint) {
+                value = currentDataPoint[selectedValue];
+            }
+            let currentBar = barsByStation[key];
+            currentBar.position.set(currentBar.position.x, currentBar.position.y, value * valueFactor / 2);
         }
     }
     
@@ -134,7 +170,7 @@ const ThreeDMap = (props) => {
         for (var key in dataSeries) {
             if (dataSeries.hasOwnProperty(key)) {
                 var dataPoint = dataSeries[key];
-                if(dataPoint["MonthYear"] == currentTime) {
+                if(dataPoint["MonthYear"] == lastDate) {
                     return dataPoint;
                 }
             }
@@ -142,6 +178,7 @@ const ThreeDMap = (props) => {
     }
 
     return <div id="three-d-view" ref={threeDViewRef}>
+        <ReadCurrentTimeSubcomponent/>
     </div>
 }
 

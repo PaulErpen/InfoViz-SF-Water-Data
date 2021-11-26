@@ -5,17 +5,22 @@ const defaultState = {
         year: 2011,
         month: 5
     },
-    yearRange: null,
+    yearMonthRange: null,
     selectedValue: "Discrete.Oxygen",
 }
 
 const reducer = (state , action) => {
   switch (action.type) {
-    case "yearRange/set":
+    case "yearMonthRange/set":
       return {
             ...state,
-            yearRange: action.payload
+            yearMonthRange: action.payload
        }
+    case "currentTime/set":
+        return {
+            ...state,
+            currentTime: action.payload
+        }
     default:
       return state
   }
@@ -24,6 +29,5 @@ const reducer = (state , action) => {
 const createInitializedStore = () => {
     return createStore(reducer, defaultState)
 } 
-
 
 export default createInitializedStore;
