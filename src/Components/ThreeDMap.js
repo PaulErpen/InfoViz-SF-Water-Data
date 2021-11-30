@@ -1,6 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import stationLocations from "./StationLocations";
+import { Interaction } from '../../node_modules/three.interaction/src/index.js';
+import * as THREE from 'three';
+import OrbitControls from "../../node_modules/three-orbitcontrols/OrbitControls.js";
 
 const ReadCurrentTimeSubcomponent = () => {
     const currentTime = useSelector(state => {
@@ -54,6 +57,7 @@ const ThreeDMap = (props) => {
     const scene = new THREE.Scene();
     let camera;
     let controls;
+    let interaction;
     const renderer = new THREE.WebGLRenderer();
     const geometry = new THREE.PlaneGeometry(sceneWidth, sceneHeight, 1, 1),
         material = new THREE.MeshBasicMaterial(),
@@ -71,8 +75,9 @@ const ThreeDMap = (props) => {
         let width  = viewWrapper.offsetWidth;
         let height = viewWrapper.offsetHeight;
         camera = new THREE.PerspectiveCamera( 20, width / height, 0.1, 1000 );
-        controls = new THREE.TrackballControls(camera, viewWrapper);
-        
+        controls = new OrbitControls(camera, viewWrapper);
+        interaction = new Interaction(renderer, scene, camera);
+
         camera.position.set(0, -200, 120);
         renderer.setSize(width, height);
         viewWrapper.appendChild(renderer.domElement);
@@ -89,6 +94,10 @@ const ThreeDMap = (props) => {
             if(!error) {
                 organizeData(data).then(processedData => {
                     organizedData = processedData;
+                    dispatch({
+                        type: "organizedStationData/set",
+                        payload: organizedData
+                    });
                     spawnBars(organizedData);
                 });
             } else {
@@ -132,7 +141,7 @@ const ThreeDMap = (props) => {
             var currentDataPoint = getDataPointForDate(data[key+".0"]);
             var value = 0;
             if(currentDataPoint) {
-                value = currentDataPoint[selectedValue];
+                value = parseFloat(currentDataPoint[selectedValue]);
             }
     
             var geometry = new THREE.BoxGeometry(boxSize, boxSize, value * valueFactor);
@@ -147,6 +156,17 @@ const ThreeDMap = (props) => {
             cube.position.set(sceneX, sceneY, 0);
             cube.scale.z = value * valueFactor;
 
+            cube.userData = {
+                stationId: key
+            }
+
+            cube.on('click', function(ev) {
+                dispatch({
+                    type: "activeStationId/set",
+                    payload: ev.target.userData.stationId
+                });
+            });
+
             scene.add(cube);
             barsByStation[key] = cube;
         }
@@ -160,7 +180,7 @@ const ThreeDMap = (props) => {
             var currentDataPoint = getDataPointForDate(organizedData[key+".0"]);
             var value = 0;
             if(currentDataPoint) {
-                value = currentDataPoint[selectedValue];
+                value = parseFloat(currentDataPoint[selectedValue]);
             }
             let currentBar = barsByStation[key];
             currentBar.scale.z = value * valueFactor;
