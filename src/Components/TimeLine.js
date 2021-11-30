@@ -76,7 +76,7 @@ const TimeLine = (props) => {
         <div className="year-indicators">
             { 
                 yearRange && yearRange.map(year => {
-                    return <div className="year-indicator">
+                    return <div key={year} className="year-indicator">
                         {year}
                     </div>
                 })

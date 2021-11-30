@@ -45,7 +45,7 @@ const DepthDisplay = () => {
         <div className="slider-bg"></div>
         <div className="depth-indicators">
             {binnedDepths.map(depth => {
-                return <div className="depth-indicator">
+                return <div key={depth} className="depth-indicator">
                     {depth}
                 </div>
             })}
