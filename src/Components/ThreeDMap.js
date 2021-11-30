@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import stationLocations from "./StationLocations";
 import { Interaction } from '../../node_modules/three.interaction/src/index.js';
 import * as THREE from 'three';
-import OrbitControls from "../../node_modules/three-orbitcontrols/OrbitControls.js";
+import TrackballControls from "three-trackballcontrols";
 
 const ReadCurrentTimeSubcomponent = () => {
     const currentTime = useSelector(state => {
@@ -75,7 +75,7 @@ const ThreeDMap = (props) => {
         let width  = viewWrapper.offsetWidth;
         let height = viewWrapper.offsetHeight;
         camera = new THREE.PerspectiveCamera( 20, width / height, 0.1, 1000 );
-        controls = new OrbitControls(camera, viewWrapper);
+        controls = new TrackballControls(camera, viewWrapper);
         interaction = new Interaction(renderer, scene, camera);
 
         camera.position.set(0, -200, 120);
