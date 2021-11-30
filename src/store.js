@@ -9,6 +9,8 @@ const defaultState = {
     selectedValue: "Optical.Backscatter",
     minDepth: 0,
     maxDepth: 4,
+    activeStationId: undefined,
+    organizedStationData: undefined,
 }
 
 const reducer = (state , action) => {
@@ -32,6 +34,16 @@ const reducer = (state , action) => {
         return {
             ...state,
             maxDepth: action.payload
+        }
+    case "activeStationId/set":
+        return {
+            ...state,
+            activeStationId: action.payload
+        }
+    case "organizedStationData/set":
+        return {
+            ...state,
+            organizedStationData: action.payload
         }
     default:
       return state

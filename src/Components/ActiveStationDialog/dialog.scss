@@ -1,0 +1,25 @@
+.active-station-dialog-wrapper {
+    position: absolute;
+    z-index: 500;
+    background: rgba(0, 0, 0, 0.514);
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    top: 0;
+
+    &.visible {
+        display: block;
+    }
+
+    .active-station-dialog {
+        background: white;
+        border-radius: 5px;
+        width: calc(100vw - 200px);
+        margin: 70px auto;
+        min-height: 200px;
+
+        .active-station-dialog-inner {
+            padding: 20px;
+        }
+    }
+}
