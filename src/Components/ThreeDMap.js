@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import stationLocations from "./StationLocations";
 import { Interaction } from '../../node_modules/three.interaction/src/index.js';
 import * as THREE from 'three';
-import OrbitControls from "../../node_modules/three-orbitcontrols/OrbitControls.js";
+import TrackballControls from "three-trackballcontrols";
 
 const ReadCurrentTimeSubcomponent = () => {
     const currentTime = useSelector(state => {
@@ -13,9 +13,17 @@ const ReadCurrentTimeSubcomponent = () => {
     return <span id="current-time-subcomp" data-current-time={""+currentTime}></span>
 }
 
+const ReadCurrentDepthsSubcomponent = () => {
+    const minDepth = useSelector(state => state.minDepth);
+    const maxDepth = useSelector(state => state.maxDepth);
+    return <span id="depth-subcomp" data-min-depth={""+minDepth} data-max-depth={""+maxDepth}></span>
+}
+
 const ThreeDMap = (props) => {
     let organizedData;
     let lastDate;
+    let lastMinDepth;
+    let lastMaxDepth;
 
     const threeDViewRef = useRef(null);
     
@@ -44,12 +52,20 @@ const ThreeDMap = (props) => {
 
     const render = () => {
         controls.update();
-        if(!lastDate) {
+        //check for changed filters
+        if(!lastDate || !lastMinDepth || !lastMaxDepth) {
             lastDate = document.getElementById("current-time-subcomp").dataset["currentTime"];
-        } else if(lastDate != document.getElementById("current-time-subcomp").dataset["currentTime"]) {
+            lastMinDepth = document.getElementById("depth-subcomp").dataset["minDepth"];
+            lastMaxDepth = document.getElementById("depth-subcomp").dataset["maxDepth"];
+        } else if(lastDate != document.getElementById("current-time-subcomp").dataset["currentTime"]
+                || lastMinDepth != document.getElementById("depth-subcomp").dataset["minDepth"] 
+                || lastMaxDepth != document.getElementById("depth-subcomp").dataset["maxDepth"]) {
             lastDate = document.getElementById("current-time-subcomp").dataset["currentTime"];
+            lastMinDepth = document.getElementById("depth-subcomp").dataset["minDepth"];
+            lastMaxDepth = document.getElementById("depth-subcomp").dataset["maxDepth"];  
             scaleBars();
         }
+
         requestAnimationFrame(render);
         renderer.render(scene, camera);
     }
@@ -75,7 +91,7 @@ const ThreeDMap = (props) => {
         let width  = viewWrapper.offsetWidth;
         let height = viewWrapper.offsetHeight;
         camera = new THREE.PerspectiveCamera( 20, width / height, 0.1, 1000 );
-        controls = new OrbitControls(camera, viewWrapper);
+        controls = new TrackballControls(camera, viewWrapper);
         interaction = new Interaction(renderer, scene, camera);
 
         camera.position.set(0, -200, 120);
@@ -138,11 +154,12 @@ const ThreeDMap = (props) => {
             if (!stationLocations.hasOwnProperty(key)) {
                 continue;
             }
-            var currentDataPoint = getDataPointForDate(data[key+".0"]);
-            var value = 0;
-            if(currentDataPoint) {
-                value = parseFloat(currentDataPoint[selectedValue]);
+            var currentDataPoints = getDataPointsForDate(data[key+".0"]);
+            var value = 0.2;
+            if(currentDataPoints && currentDataPoints.length > 0) {
+                value = 0.2 + averageValueFromDataPoints(currentDataPoints, selectedValue);
             }
+            console.log(value);
     
             var geometry = new THREE.BoxGeometry(boxSize, boxSize, value * valueFactor);
         
@@ -177,29 +194,40 @@ const ThreeDMap = (props) => {
             if (!stationLocations.hasOwnProperty(key)) {
                 continue;
             }
-            var currentDataPoint = getDataPointForDate(organizedData[key+".0"]);
-            var value = 0;
-            if(currentDataPoint) {
-                value = parseFloat(currentDataPoint[selectedValue]);
+            var currentDataPoints = getDataPointsForDate(organizedData[key+".0"]);
+            var value = 0.2;
+            if(currentDataPoints && currentDataPoints.length > 0) {
+                value = 0.2 + averageValueFromDataPoints(currentDataPoints, selectedValue);
             }
             let currentBar = barsByStation[key];
             currentBar.scale.z = value * valueFactor;
         }
     }
+
+    const averageValueFromDataPoints = (dataPoints, valueKey) => {
+        return dataPoints.map(p => p[valueKey])
+                    .map(f => parseFloat(f))
+                    .reduce((a, b) => a + b, 0) / dataPoints.length
+    }
     
-    const getDataPointForDate = (dataSeries) => {
+    const getDataPointsForDate = (dataSeries) => {
+        let data_points = [];
         for (var key in dataSeries) {
             if (dataSeries.hasOwnProperty(key)) {
                 var dataPoint = dataSeries[key];
-                if(dataPoint["MonthYear"] == lastDate) {
-                    return dataPoint;
+                if(dataPoint["MonthYear"] == lastDate 
+                    && parseInt(dataPoint["Binned.Depth"]) <= 3 - lastMinDepth 
+                    && parseInt(dataPoint["Binned.Depth"]) >= 3 - lastMaxDepth) {
+                    data_points.push(dataPoint);
                 }
             }
         }
+        return data_points;
     }
 
     return <div id="three-d-view" ref={threeDViewRef}>
         <ReadCurrentTimeSubcomponent/>
+        <ReadCurrentDepthsSubcomponent/>
     </div>
 }
 

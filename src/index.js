@@ -5,7 +5,7 @@ import "./styles/main.scss";
 import TimeLine from './Components/TimeLine';
 import { Provider } from 'react-redux';
 import createInitializedStore from './store';
-import DepthDisplay from './Components/DepthDisplay';
+import DepthDisplay from './Components/DepthDisplay/DepthDisplay';
 import ActiveStationDialog from './Components/ActiveStationDialog/ActiveStationDialog';
 
 const MapVisualization = () => {

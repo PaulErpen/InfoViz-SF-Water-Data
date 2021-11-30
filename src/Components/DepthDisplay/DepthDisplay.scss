@@ -1,0 +1,71 @@
+.depth-display {
+    h3 {
+        margin: 0;
+        padding-bottom: 10px;
+    }
+
+    input[type="range"] {
+        transform: rotate(-90deg) translateX(-50%) translateY(-310%);
+        position: absolute;
+        pointer-events: none;
+        background: transparent;
+        appearance: none;
+
+        &::-webkit-slider-thumb {
+            pointer-events: all;
+            pointer-events: all;
+            appearance: none;
+            width: 10px;
+            height: 15px;
+            background: green;
+            transform: translateX(5px);
+        }
+
+        &#min-value {
+            &::-webkit-slider-thumb {
+                transform: translateX(-5px);
+            }
+        }
+    }
+
+    position: absolute;
+    display: block;
+    width: 110px;
+    padding: 15px;
+    background: white;
+    z-index: 20;
+    top: 20px;
+    right: 20px;
+
+    .slider-bg {
+        position: absolute;
+        width: 10px;
+        height: 135px;
+        background: red;
+        z-index: -1;
+        margin: 7px 12px;
+        border-radius: 10px;
+    }
+
+    .depth-indicators {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 135px;
+        margin-left: 40px;
+        margin-top: 8px;
+
+        .depth-indicator::before {
+            content: "";
+            height: 0px;
+            width: 0;
+            display: block;
+            border-right: 5px solid grey;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            float: left;
+            margin-top: 4px;
+            margin-right: 8px;
+        }
+    }
+}
