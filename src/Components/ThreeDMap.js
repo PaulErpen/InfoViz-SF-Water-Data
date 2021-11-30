@@ -132,7 +132,7 @@ const ThreeDMap = (props) => {
             var currentDataPoint = getDataPointForDate(data[key+".0"]);
             var value = 0;
             if(currentDataPoint) {
-                value = currentDataPoint[selectedValue];
+                value = parseFloat(currentDataPoint[selectedValue]);
             }
     
             var geometry = new THREE.BoxGeometry(boxSize, boxSize, value * valueFactor);
@@ -160,7 +160,7 @@ const ThreeDMap = (props) => {
             var currentDataPoint = getDataPointForDate(organizedData[key+".0"]);
             var value = 0;
             if(currentDataPoint) {
-                value = currentDataPoint[selectedValue];
+                value = parseFloat(currentDataPoint[selectedValue]);
             }
             let currentBar = barsByStation[key];
             currentBar.scale.z = value * valueFactor;

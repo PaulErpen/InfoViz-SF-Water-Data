@@ -6,7 +6,9 @@ const defaultState = {
         month: 5
     },
     yearMonthRange: null,
-    selectedValue: "Discrete.Oxygen",
+    selectedValue: "Optical.Backscatter",
+    minDepth: 0,
+    maxDepth: 4,
 }
 
 const reducer = (state , action) => {
@@ -20,6 +22,16 @@ const reducer = (state , action) => {
         return {
             ...state,
             currentTime: action.payload
+        }
+    case "minDepth/set":
+        return {
+            ...state,
+            minDepth: action.payload
+        }
+    case "maxDepth/set":
+        return {
+            ...state,
+            maxDepth: action.payload
         }
     default:
       return state
