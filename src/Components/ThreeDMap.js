@@ -44,7 +44,6 @@ const ThreeDMap = (props) => {
         yCells = boundsHeight / cellSize,
         sceneWidth = 100,
         sceneHeight = 100,
-        boxSize = sceneWidth / xCells,
         valueFactor = 0.5;
     
     const colorScale = d3.scale.linear()
@@ -162,7 +161,7 @@ const ThreeDMap = (props) => {
             }
             console.log(value);
     
-            var geometry = new THREE.BoxGeometry(boxSize, boxSize, minBarHeight);
+            var geometry = new THREE.BoxGeometry(0.5, 0.5, 1);
         
             var material = new THREE.MeshBasicMaterial({
                 color: colorScale(value)
@@ -171,7 +170,7 @@ const ThreeDMap = (props) => {
             var cube = new THREE.Mesh(geometry, material);
             var sceneX = stationLocations[key].x / img_x * sceneWidth - sceneWidth *0.5;
             var sceneY = (img_y - stationLocations[key].y) / img_y * sceneHeight - sceneHeight *0.5;
-            cube.position.set(sceneX, sceneY, 0);
+            cube.position.set(sceneX, sceneY, (value * valueFactor + minBarHeight) * 0.5);
             cube.scale.z = value * valueFactor + minBarHeight;
 
             cube.userData = {
@@ -202,6 +201,7 @@ const ThreeDMap = (props) => {
             }
             let currentBar = barsByStation[key];
             currentBar.scale.z = value * valueFactor + minBarHeight;
+            currentBar.position.z = (value * valueFactor + minBarHeight) * 0.5;
         }
     }
 
