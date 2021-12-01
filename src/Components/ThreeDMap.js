@@ -30,6 +30,7 @@ const ThreeDMap = (props) => {
     const selectedValue = useSelector(state => state.selectedValue);
     const dispatch = useDispatch();
 
+    const minBarHeight = 0.2;
     const img_x = 3865;
     const img_y = 3865;
     
@@ -155,13 +156,13 @@ const ThreeDMap = (props) => {
                 continue;
             }
             var currentDataPoints = getDataPointsForDate(data[key+".0"]);
-            var value = 0.2;
+            var value = 0;
             if(currentDataPoints && currentDataPoints.length > 0) {
-                value = 0.2 + averageValueFromDataPoints(currentDataPoints, selectedValue);
+                value = averageValueFromDataPoints(currentDataPoints, selectedValue);
             }
             console.log(value);
     
-            var geometry = new THREE.BoxGeometry(boxSize, boxSize, value * valueFactor);
+            var geometry = new THREE.BoxGeometry(boxSize, boxSize, minBarHeight);
         
             var material = new THREE.MeshBasicMaterial({
                 color: colorScale(value)
@@ -171,7 +172,7 @@ const ThreeDMap = (props) => {
             var sceneX = stationLocations[key].x / img_x * sceneWidth - sceneWidth *0.5;
             var sceneY = (img_y - stationLocations[key].y) / img_y * sceneHeight - sceneHeight *0.5;
             cube.position.set(sceneX, sceneY, 0);
-            cube.scale.z = value * valueFactor;
+            cube.scale.z = value * valueFactor + minBarHeight;
 
             cube.userData = {
                 stationId: key
@@ -195,12 +196,12 @@ const ThreeDMap = (props) => {
                 continue;
             }
             var currentDataPoints = getDataPointsForDate(organizedData[key+".0"]);
-            var value = 0.2;
+            var value = 0;
             if(currentDataPoints && currentDataPoints.length > 0) {
-                value = 0.2 + averageValueFromDataPoints(currentDataPoints, selectedValue);
+                value = 0 + averageValueFromDataPoints(currentDataPoints, selectedValue);
             }
             let currentBar = barsByStation[key];
-            currentBar.scale.z = value * valueFactor;
+            currentBar.scale.z = value * valueFactor + minBarHeight;
         }
     }
 
