@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import createInitializedStore from './store';
 import DepthDisplay from './Components/DepthDisplay/DepthDisplay';
 import ActiveStationDialog from './Components/ActiveStationDialog/ActiveStationDialog';
+import ValueSelector from './Components/ValueSelector/ValueSelector';
 
 const MapVisualization = () => {
     const store = createInitializedStore();
@@ -17,6 +18,7 @@ const MapVisualization = () => {
                 <ThreeDMap/>
                 <DepthDisplay/>
                 <ActiveStationDialog/>
+                <ValueSelector/>
             </div>
             <TimeLine/>
         </Provider>
