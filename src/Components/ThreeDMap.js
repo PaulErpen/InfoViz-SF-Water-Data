@@ -4,6 +4,7 @@ import stationLocations from "./StationLocations";
 import { Interaction } from '../../node_modules/three.interaction/src/index.js';
 import * as THREE from 'three';
 import TrackballControls from "three-trackballcontrols";
+import { valueColors, valueScales } from "./MetaData";
 
 const ReadCurrentTimeSubcomponent = () => {
     const currentTime = useSelector(state => {
@@ -206,9 +207,10 @@ const ThreeDMap = (props) => {
             for(const valueKey in averages) {
                 var value = averages[valueKey];
                 let currentBar = barsByStation[stationKey][i];
-                currentBar.scale.z = value * valueFactor + minBarHeight;
-                currentBar.position.z = (value * valueFactor + minBarHeight) * 0.5 + prevHeight;
+                currentBar.scale.z = value * valueScales[valueKey] + minBarHeight;
+                currentBar.position.z = (value * valueScales[valueKey] + minBarHeight) * 0.5 + prevHeight;
                 prevHeight += currentBar.scale.z;
+                currentBar.material.color.set(valueColors[valueKey]);
                 i++;
             }
             for(; i<2; i++) {
