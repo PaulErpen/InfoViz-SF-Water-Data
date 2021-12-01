@@ -42,15 +42,8 @@ const ThreeDMap = (props) => {
     
     const barsByStation = {};
 
-    const bounds = [253700, 6637800, 273800, 6663700], // UTM 33N left, bottom, right, top
-        boundsWidth = bounds[2] - bounds[0],
-        boundsHeight = bounds[3] - bounds[1],
-        cellSize = 100,
-        xCells = boundsWidth / cellSize,
-        yCells = boundsHeight / cellSize,
-        sceneWidth = 100,
-        sceneHeight = 100,
-        valueFactor = 0.5;
+    const sceneWidth = 100;
+    const sceneHeight = 100;
     
     const colorScale = d3.scale.linear()
         .domain([0, 100, 617])
