@@ -6,7 +6,7 @@ const defaultState = {
         month: 5
     },
     yearMonthRange: null,
-    selectedValue: "Optical.Backscatter",
+    selectedValues: ["Optical.Backscatter", "Calculated.Oxygen"],
     minDepth: 0,
     maxDepth: 4,
     activeStationId: undefined,
@@ -44,6 +44,11 @@ const reducer = (state , action) => {
         return {
             ...state,
             organizedStationData: action.payload
+        }
+    case "selectedValues/set":
+        return {
+            ...state,
+            selectedValues: action.payload
         }
     default:
       return state

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import "./dialog.scss";
+import "./ActiveStationDialog.scss";
 
 const ActiveStationDialog = () => {
     const dispatch = useDispatch();
