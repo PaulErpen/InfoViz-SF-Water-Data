@@ -27,7 +27,7 @@ const ThreeDMap = (props) => {
 
     const threeDViewRef = useRef(null);
     
-    const selectedValue = useSelector(state => state.selectedValue);
+    const selectedValues = useSelector(state => state.selectedValues);
     const dispatch = useDispatch();
 
     const minBarHeight = 0.2;
@@ -154,61 +154,75 @@ const ThreeDMap = (props) => {
             if (!stationLocations.hasOwnProperty(key)) {
                 continue;
             }
-            var currentDataPoints = getDataPointsForDate(data[key+".0"]);
-            var value = 0;
-            if(currentDataPoints && currentDataPoints.length > 0) {
-                value = averageValueFromDataPoints(currentDataPoints, selectedValue);
-            }
-            console.log(value);
-    
-            var geometry = new THREE.BoxGeometry(0.5, 0.5, 1);
-        
-            var material = new THREE.MeshBasicMaterial({
-                color: colorScale(value)
-            });
-        
-            var cube = new THREE.Mesh(geometry, material);
-            var sceneX = stationLocations[key].x / img_x * sceneWidth - sceneWidth *0.5;
-            var sceneY = (img_y - stationLocations[key].y) / img_y * sceneHeight - sceneHeight *0.5;
-            cube.position.set(sceneX, sceneY, (value * valueFactor + minBarHeight) * 0.5);
-            cube.scale.z = value * valueFactor + minBarHeight;
-
-            cube.userData = {
-                stationId: key
-            }
-
-            cube.on('click', function(ev) {
-                dispatch({
-                    type: "activeStationId/set",
-                    payload: ev.target.userData.stationId
+            //setup two bars per station
+            barsByStation[key] = [];
+            for(var i = 0; i < 2; i++) {
+                var geometry = new THREE.BoxGeometry(0.5, 0.5, 1);
+            
+                var material = new THREE.MeshBasicMaterial({
+                    color: colorScale(i * 100)
                 });
-            });
+            
+                var cube = new THREE.Mesh(geometry, material);
+                var sceneX = stationLocations[key].x / img_x * sceneWidth - sceneWidth *0.5;
+                var sceneY = (img_y - stationLocations[key].y) / img_y * sceneHeight - sceneHeight *0.5;
+                cube.position.set(sceneX, sceneY, 0);
 
-            scene.add(cube);
-            barsByStation[key] = cube;
+                cube.userData = {
+                    stationId: key
+                }
+
+                cube.on('click', function(ev) {
+                    dispatch({
+                        type: "activeStationId/set",
+                        payload: ev.target.userData.stationId
+                    });
+                });
+
+                scene.add(cube);
+                barsByStation[key].push(cube);
+            }
         }
+        scaleBars();
     }
 
     const scaleBars = () => {
-        for (var key in stationLocations) {
-            if (!stationLocations.hasOwnProperty(key)) {
+        for (const stationKey in stationLocations) {
+            if (!stationLocations.hasOwnProperty(stationKey)) {
                 continue;
             }
-            var currentDataPoints = getDataPointsForDate(organizedData[key+".0"]);
-            var value = 0;
-            if(currentDataPoints && currentDataPoints.length > 0) {
-                value = 0 + averageValueFromDataPoints(currentDataPoints, selectedValue);
+            var currentDataPoints = getDataPointsForDate(organizedData[stationKey+".0"]);
+            var averages = averageValuesFromDataPoints(currentDataPoints, selectedValues);
+            var i = 0;
+            var prevHeight = 0;
+            for(const valueKey in averages) {
+                var value = averages[valueKey];
+                let currentBar = barsByStation[stationKey][i];
+                currentBar.scale.z = value * valueFactor + minBarHeight;
+                currentBar.position.z = (value * valueFactor + minBarHeight) * 0.5 + prevHeight;
+                prevHeight += currentBar.scale.z;
+                i++;
             }
-            let currentBar = barsByStation[key];
-            currentBar.scale.z = value * valueFactor + minBarHeight;
-            currentBar.position.z = (value * valueFactor + minBarHeight) * 0.5;
+            
         }
     }
 
-    const averageValueFromDataPoints = (dataPoints, valueKey) => {
-        return dataPoints.map(p => p[valueKey])
+    const averageValuesFromDataPoints = (dataPoints, valueKeys) => {
+        let averagesPerKey = {};
+        for (const key in valueKeys) {
+            if (!Object.hasOwnProperty.call(valueKeys, key)) { 
+                continue;
+            }
+            const valueKey = valueKeys[key];
+            if(!dataPoints || dataPoints.length == 0) {
+                averagesPerKey[valueKey] = 0;
+            } else {
+                averagesPerKey[valueKey] = dataPoints.map(p => p[valueKey])
                     .map(f => parseFloat(f))
-                    .reduce((a, b) => a + b, 0) / dataPoints.length
+                    .reduce((a, b) => a + b, 0) / dataPoints.length;
+            }
+        }
+        return averagesPerKey;
     }
     
     const getDataPointsForDate = (dataSeries) => {
