@@ -1,12 +1,25 @@
 #main-view {
     width: 100vw;
     height: 100vh;
+    font-family: sans-serif;
 
     .three-d-view-wrapper,
     #three-d-view {
         width: 100vw;
         height: calc(100vh - 200px);
         position: relative;
+    }
+
+    .depth-display {
+        width: 120px;
+    }
+
+    #min-value, #max-value {
+      // background: DarkBlue;
+    }
+
+    .slider-bg {
+       // background: AliceBlue;
     }
 
     .time-line-wrapper {
@@ -16,21 +29,22 @@
             display: block;
             position: relative;
             width: calc(100vw - 80px);
-            height: 50px;
-            background: red;
+            height: 30px;
+            background: AliceBlue;
 
             .time-line-slider {
                 position: absolute;
                 display: block;
-                height: 50px;
+                height: 30px;
                 width: 20px;
-                background: green;
+                background: DarkBlue;
             }
         }
 
         .year-indicators {
             display: flex;
             justify-content: space-between;
+            margin-top: 10px;
         }
     }
 }
