@@ -10,8 +10,13 @@
         position: relative;
     }
 
+    .value-selector-wrapper {
+        border-radius: 10px;
+    }
+
     .depth-display {
         width: 120px;
+        border-radius: 10px;
     }
 
     #min-value, #max-value {
