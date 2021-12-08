@@ -1,3 +1,9 @@
+const valueOptions = [
+    { value: ["Nitrate...Nitrite", "Ammonium", "Phosphate", "Silicate"], label: "Agricultural pollutants" },
+    { value: ["Calculated.Oxygen"], label: "Oxygen" },
+    { value: ["Discrete.Chlorophyll"], label: "Chlorophyl" },
+];
+
 const valueScales = {
     "Optical.Backscatter": 0.3,
     "Calculated.Oxygen": 0.125,
@@ -20,7 +26,15 @@ const valueColors = {
     "Discrete.Chlorophyll": "#004a11",
 }
 
+const labelToUnitMapping = {
+    "Agricultural pollutants": "Micromolar",
+    "Oxygen": "micrograms/L",
+    "Chlorophyl": "micrograms/L",
+}
+
 module.exports = {
     valueScales: valueScales,
-    valueColors: valueColors
+    valueColors: valueColors,
+    valueOptions: valueOptions,
+    labelToUnitMapping: labelToUnitMapping
 }

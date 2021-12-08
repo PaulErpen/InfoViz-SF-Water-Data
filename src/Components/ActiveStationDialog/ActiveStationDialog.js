@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { valueColors } from "../MetaData";
+import Legend from "../Legend/Legend";
+import { labelToUnitMapping, valueColors, valueOptions } from "../MetaData";
 import "./ActiveStationDialog.scss";
 
 const ActiveStationDialog = () => {
     const dispatch = useDispatch();
+    const selectedOptionLabel = useSelector(state => valueOptions.find(opt => opt.value.join(":") === state.selectedValues.join(":")).label);
     const {activeStationId, activeStationData} = useSelector(state => {
         return {
           activeStationId: state.activeStationId, 
@@ -12,13 +14,12 @@ const ActiveStationDialog = () => {
         };
     });
     const selectedValues = useSelector(state => state.selectedValues);
-    const svgRef = useRef(null);
 
     useEffect(() => {
         if(activeStationId && activeStationData) {
           const margin = {top: 10, right: 30, bottom: 30, left: 60},
               width = window.innerWidth - 240 - margin.left - margin.right,
-              height = 400 - margin.top - margin.bottom;
+              height = 400 - 40 - margin.top - margin.bottom;
 
           // append the svg object to the body of the page
           const dataViz = d3.select("#my_dataviz");
@@ -79,8 +80,12 @@ const ActiveStationDialog = () => {
     return <div className={`active-station-dialog-wrapper ${activeStationId ? "visible" : ""}`}>
         <div className="active-station-dialog">
             <div className="active-station-dialog-inner">
-                <h3>Station {activeStationId}</h3>
-                <div id="my_dataviz" ref={svgRef}></div>
+                <h3>Station {activeStationId} - {selectedOptionLabel}</h3>
+                <div className="unit-indicator">in {labelToUnitMapping[selectedOptionLabel]}</div>
+                <div id="my_dataviz"></div>
+                <div className="legend-wrapper">
+                  <Legend/>
+                </div>
             </div>
             <button className="close-button" type="button" onClick={() => close()}>x</button>
         </div>

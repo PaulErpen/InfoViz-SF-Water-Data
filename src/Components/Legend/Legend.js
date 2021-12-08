@@ -9,7 +9,7 @@ const Legend = () => {
     return <div className="legend">
         <h3>Legend</h3>
         { selectedValues.map(valueKey => {
-            return <div className="legend-item">
+            return <div key={valueKey} className="legend-item">
                 <span className="color-indicator" style={{background: valueColors[valueKey]}}></span>
                 &nbsp;
                 <span>{valueKey}</span>
