@@ -44,10 +44,6 @@ const ThreeDMap = (props) => {
 
     const sceneWidth = 100;
     const sceneHeight = 100;
-    
-    const colorScale = d3.scale.linear()
-        .domain([0, 100, 617])
-        .range(['#fec576', '#f99d1c', '#E31A1C']);
 
     const render = () => {
         controls.update();
@@ -107,20 +103,16 @@ const ThreeDMap = (props) => {
         dirLight.position.set(-70, -50, 80);
         scene.add(dirLight);
         render();
-        var csv = d3.dsv(',', 'text/plain');
-        csv('data/sf_mean_by_month.csv').get(function(error, data) {
-            if(!error) {
-                organizeData(data).then(processedData => {
-                    organizedData = processedData;
-                    dispatch({
-                        type: "organizedStationData/set",
-                        payload: organizedData
-                    });
-                    spawnBars(organizedData);
+        d3.csv(window.location.origin+'/data/sf_mean_by_month.csv')
+        .then(function(data) {
+            organizeData(data).then(processedData => {
+                organizedData = processedData;
+                dispatch({
+                    type: "organizedStationData/set",
+                    payload: organizedData
                 });
-            } else {
-                console.error("Could not load or parse 'data/sf_mean_by_month.csv': " + error);
-            }
+                spawnBars(organizedData);
+            });
         });
     }
     
@@ -162,7 +154,7 @@ const ThreeDMap = (props) => {
                 var geometry = new THREE.BoxGeometry(0.5, 0.5, 1);
             
                 var material = new THREE.MeshBasicMaterial({
-                    color: colorScale(i * 100)
+                    color: "#153828"
                 });
             
                 var cube = new THREE.Mesh(geometry, material);

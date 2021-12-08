@@ -4,27 +4,60 @@ import "./ActiveStationDialog.scss";
 
 const ActiveStationDialog = () => {
     const dispatch = useDispatch();
-    const [activeStationId, activeStationData] = useSelector(state => {
-        return [
-            state.activeStationId, 
-            state.organizedStationData ? state.organizedStationData[state.activeStationId+".0"] : undefined
-        ];
+    const {activeStationId, activeStationData} = useSelector(state => {
+        return {
+          activeStationId: state.activeStationId, 
+          activeStationData: state.organizedStationData ? state.organizedStationData[state.activeStationId+".0"] : undefined
+        };
     });
     const svgRef = useRef(null);
 
     useEffect(() => {
-        if(activeStationId) {
-            //This is where your code is supposed to go Ben
-            console.log("Running D3 line graph thingy!");
-            //use svgRef.current to access the dom eloement that contains the svg element you want to manipulate with d3.js :)
-            console.log(svgRef.current.width);
-            //d3 is accessible via the d3 javascript object
-            //This object contains all the data for the active station, its a huge array
-            console.log(activeStationData)
-            //uncomment the next line and you get a debug point in the browser when opening devTools ("F12")
-            //debugger;
+        if(activeStationId && activeStationData) {
+          const margin = {top: 10, right: 30, bottom: 30, left: 60},
+              width = 460 - margin.left - margin.right,
+              height = 400 - margin.top - margin.bottom;
+
+          // append the svg object to the body of the page
+          const svg = d3.select("#my_dataviz")
+            .append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+              .attr("transform", `translate(${margin.left},${margin.top})`);
+
+          let data = activeStationData.map(point => {
+            point.date = d3.timeParse("%Y-%m-%d")(point["MonthYear"]+"-01");
+            return point;
+          });
+
+          // Add X axis --> it is a date format
+          const x = d3.scaleTime()
+            .domain(d3.extent(data, function(d) { return d.date; }))
+            .range([ 0, width ]);
+
+          svg.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x));
+
+          // Add Y axis
+          const y = d3.scaleLinear()
+            .domain([0, d3.max(data, function(d) { return +parseFloat(d["Fluorescence"]); })])
+            .range([ height, 0 ]);
+          svg.append("g")
+            .call(d3.axisLeft(y));
+
+          // Add the line
+          svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 1.5)
+            .attr("d", d3.line()
+              .x(function(d) { return x(d.date) })
+              .y(function(d) { return y(parseFloat(d["Fluorescence"])) }))
         }
-    }, [activeStationId]);
+    }, [activeStationData]);
 
     const close = () => {
         dispatch({
@@ -37,7 +70,7 @@ const ActiveStationDialog = () => {
         <div className="active-station-dialog">
             <div className="active-station-dialog-inner">
                 Station {activeStationId}
-                <svg ref={svgRef} width="500" height="400"></svg>
+                <svg id="my_dataviz" ref={svgRef} width="500" height="400"></svg>
             </div>
             <button type="button" onClick={() => close()}>Close</button>
         </div>
