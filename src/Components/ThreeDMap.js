@@ -150,7 +150,7 @@ const ThreeDMap = (props) => {
             }
             //setup two bars per station
             barsByStation[key] = [];
-            for(var i = 0; i < 2; i++) {
+            for(var i = 0; i < 4; i++) {
                 var geometry = new THREE.BoxGeometry(0.5, 0.5, 1);
             
                 var material = new THREE.MeshBasicMaterial({
@@ -198,7 +198,7 @@ const ThreeDMap = (props) => {
                 currentBar.material.color.set(valueColors[valueKey]);
                 i++;
             }
-            for(; i<2; i++) {
+            for(; i<4; i++) {
                 let currentBar = barsByStation[stationKey][i];
                 currentBar.scale.z = 0;
                 currentBar.position.z = 0;

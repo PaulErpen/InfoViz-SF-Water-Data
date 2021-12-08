@@ -5,8 +5,9 @@ import "./ValueSelector.scss";
 
 const ValueSelector = () => {
     const options = [
-        { value: ["Optical.Backscatter", "Calculated.Oxygen"], label: "Optical Backscatter/Oxygen" },
-        { value: ["Calculated.SPM"], label: "Calculated SPM" }
+        { value: ["Nitrate...Nitrite", "Ammonium", "Phosphate", "Silicate"], label: "Agricultural pollutants" },
+        { value: ["Calculated.Oxygen"], label: "Oxygen" },
+        { value: ["Discrete.Chlorophyll"], label: "Chlorophyl" },
     ];
     const value = useSelector(state => options.find(opt => opt.value.join(":") === state.selectedValues.join(":")));
     const dispatch = useDispatch();

@@ -6,7 +6,7 @@ const defaultState = {
         month: 5
     },
     yearMonthRange: null,
-    selectedValues: ["Optical.Backscatter", "Calculated.Oxygen"],
+    selectedValues: ["Nitrate...Nitrite", "Ammonium", "Phosphate", "Silicate"],
     minDepth: 0,
     maxDepth: 4,
     activeStationId: undefined,
