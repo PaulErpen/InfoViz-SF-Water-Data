@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { valueColors } from "../MetaData";
 import "./ActiveStationDialog.scss";
 
 const ActiveStationDialog = () => {
@@ -10,6 +11,7 @@ const ActiveStationDialog = () => {
           activeStationData: state.organizedStationData ? state.organizedStationData[state.activeStationId+".0"] : undefined
         };
     });
+    const selectedValues = useSelector(state => state.selectedValues);
     const svgRef = useRef(null);
 
     useEffect(() => {
@@ -40,22 +42,29 @@ const ActiveStationDialog = () => {
             .attr("transform", `translate(0, ${height})`)
             .call(d3.axisBottom(x));
 
-          // Add Y axis
-          const y = d3.scaleLinear()
-            .domain([0, d3.max(data, function(d) { return +parseFloat(d["Fluorescence"]); })])
-            .range([ height, 0 ]);
-          svg.append("g")
-            .call(d3.axisLeft(y));
+          let max_value = data.map(
+            point => selectedValues.map(
+              key => parseFloat(point[key]))
+              .reduce((a, b) => {return Math.max(a,b)}, 0))
+              .reduce((a, b) => {return Math.max(a,b)}, 0)
+          selectedValues.forEach(valueKey => {
+            // Add Y axis
+            const y = d3.scaleLinear()
+              .domain([0, max_value])
+              .range([ height, 0 ]);
+            svg.append("g")
+              .call(d3.axisLeft(y));
 
-          // Add the line
-          svg.append("path")
-            .datum(data)
-            .attr("fill", "none")
-            .attr("stroke", "steelblue")
-            .attr("stroke-width", 1.5)
-            .attr("d", d3.line()
-              .x(function(d) { return x(d.date) })
-              .y(function(d) { return y(parseFloat(d["Fluorescence"])) }))
+            // Add the line
+            svg.append("path")
+              .datum(data)
+              .attr("fill", "none")
+              .attr("stroke", valueColors[valueKey])
+              .attr("stroke-width", 1.5)
+              .attr("d", d3.line()
+                .x(function(d) { return x(d.date) })
+                .y(function(d) { return y(parseFloat(d[valueKey])) }))
+          });
         }
     }, [activeStationData]);
 
