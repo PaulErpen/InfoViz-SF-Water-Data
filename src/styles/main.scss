@@ -44,4 +44,20 @@
             margin-top: 10px;
         }
     }
+
+    .close-button {
+        appearance: none;
+        border: none;
+        background: transparent;
+        font-weight: bolder;
+        font-size: 20px;
+        color: #707070;
+        position: absolute;
+        top: 13px;
+        right: 16px;
+
+        &:hover {
+            color: black;
+        }
+    }
 }

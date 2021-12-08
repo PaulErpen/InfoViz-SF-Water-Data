@@ -17,12 +17,13 @@ const ActiveStationDialog = () => {
     useEffect(() => {
         if(activeStationId && activeStationData) {
           const margin = {top: 10, right: 30, bottom: 30, left: 60},
-              width = 460 - margin.left - margin.right,
+              width = window.innerWidth - 240 - margin.left - margin.right,
               height = 400 - margin.top - margin.bottom;
 
           // append the svg object to the body of the page
-          const svg = d3.select("#my_dataviz")
-            .append("svg")
+          const dataViz = d3.select("#my_dataviz");
+          dataViz.html("");
+          const svg = dataViz.append("svg")
               .attr("width", width + margin.left + margin.right)
               .attr("height", height + margin.top + margin.bottom)
             .append("g")
@@ -78,10 +79,10 @@ const ActiveStationDialog = () => {
     return <div className={`active-station-dialog-wrapper ${activeStationId ? "visible" : ""}`}>
         <div className="active-station-dialog">
             <div className="active-station-dialog-inner">
-                Station {activeStationId}
-                <svg id="my_dataviz" ref={svgRef} width="500" height="400"></svg>
+                <h3>Station {activeStationId}</h3>
+                <div id="my_dataviz" ref={svgRef}></div>
             </div>
-            <button type="button" onClick={() => close()}>Close</button>
+            <button className="close-button" type="button" onClick={() => close()}>x</button>
         </div>
     </div>
 }
