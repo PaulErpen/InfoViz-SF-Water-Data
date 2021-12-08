@@ -1,12 +1,8 @@
 .depth-display {
-    position: absolute;
     display: block;
     width: 110px;
     padding: 15px;
     background: white;
-    z-index: 20;
-    top: 140px;
-    right: 20px;
 
     h3 {
         margin: 0;
@@ -19,6 +15,7 @@
         pointer-events: none;
         background: transparent;
         appearance: none;
+        z-index: 1;
 
         &::-webkit-slider-thumb {
             pointer-events: all;
@@ -42,7 +39,6 @@
         width: 10px;
         height: 135px;
         background: AliceBlue;
-        z-index: -1;
         margin: 7px 12px;
         border-radius: 10px;
     }

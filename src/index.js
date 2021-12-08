@@ -8,6 +8,7 @@ import createInitializedStore from './store';
 import DepthDisplay from './Components/DepthDisplay/DepthDisplay';
 import ActiveStationDialog from './Components/ActiveStationDialog/ActiveStationDialog';
 import ValueSelector from './Components/ValueSelector/ValueSelector';
+import Legend from './Components/Legend/Legend';
 
 const MapVisualization = () => {
     const store = createInitializedStore();
@@ -16,9 +17,14 @@ const MapVisualization = () => {
         <Provider store={store}>
             <div className="three-d-view-wrapper">
                 <ThreeDMap/>
-                <DepthDisplay/>
                 <ActiveStationDialog/>
-                <ValueSelector/>
+                <div className="controls-container">
+                    <ValueSelector/>
+                    <div className="legend-wrapper">
+                        <Legend/>
+                    </div>
+                    <DepthDisplay/>
+                </div>
             </div>
             <TimeLine/>
         </Provider>
