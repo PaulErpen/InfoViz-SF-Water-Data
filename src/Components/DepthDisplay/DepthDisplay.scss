@@ -50,6 +50,11 @@
         height: 135px;
         margin-left: 40px;
         margin-top: 8px;
+        user-select: none;
+        -moz-user-select: none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -o-user-select: none;
 
         .depth-indicator::before {
             content: "";
