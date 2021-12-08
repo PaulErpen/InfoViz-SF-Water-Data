@@ -30,6 +30,12 @@ const labelToUnitMapping = {
     "Agricultural pollutants": "Micromolar",
     "Oxygen": "micrograms/L",
     "Chlorophyl": "micrograms/L",
+    "Nitrate...Nitrite": "Micromolar",
+    "Ammonium": "Micromolar",
+    "Phosphate": "Micromolar",
+    "Silicate": "Micromolar",
+    "Calculated.Oxygen": "micrograms/L",
+    "Discrete.Chlorophyll": "micrograms/L",
 }
 
 module.exports = {

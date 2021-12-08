@@ -4,7 +4,7 @@ import stationLocations from "./StationLocations";
 import { Interaction } from '../../node_modules/three.interaction/src/index.js';
 import * as THREE from 'three';
 import TrackballControls from "three-trackballcontrols";
-import { valueColors, valueScales } from "./MetaData";
+import { labelToUnitMapping, valueColors, valueScales } from "./MetaData";
 
 const ReadCurrentTimeSubcomponent = () => {
     const currentTime = useSelector(state => {
@@ -31,6 +31,7 @@ const ThreeDMap = (props) => {
     let lastMinDepth;
     let lastMaxDepth;
     let lastSelectedValuesString;
+    let tooltipEnabledObjects = [];
 
     const threeDViewRef = useRef(null);
     
@@ -79,6 +80,7 @@ const ThreeDMap = (props) => {
     const textureLoader = new THREE.TextureLoader();
     const ambLight = new THREE.AmbientLight(0x777777);
     const dirLight = new THREE.DirectionalLight(0xcccccc, 1);
+    var raycaster = new THREE.Raycaster();
     
     useEffect(() => {
         initialize3DView();
@@ -174,9 +176,11 @@ const ThreeDMap = (props) => {
                 });
 
                 scene.add(cube);
+                tooltipEnabledObjects.push(cube);
                 barsByStation[key].push(cube);
             }
         }
+        window.addEventListener('mousemove', onMouseMove, false);
         scaleBars();
     }
 
@@ -192,6 +196,10 @@ const ThreeDMap = (props) => {
             for(const valueKey in averages) {
                 var value = averages[valueKey];
                 let currentBar = barsByStation[stationKey][i];
+                currentBar.userData = {
+                    ...currentBar.userData,
+                    tooltipText: value.toFixed(2) + " " + labelToUnitMapping[valueKey]
+                }
                 currentBar.scale.z = value * valueScales[valueKey] + minBarHeight;
                 currentBar.position.z = (value * valueScales[valueKey] + minBarHeight) * 0.5 + prevHeight;
                 prevHeight += currentBar.scale.z;
@@ -239,10 +247,100 @@ const ThreeDMap = (props) => {
         return data_points;
     }
 
+    // this will be 2D coordinates of the current mouse position, [0,0] is middle of the screen.
+    var mouse = new THREE.Vector2();
+
+    var latestMouseProjection; // this is the latest projection of the mouse on object (i.e. intersection with ray)
+    var hoveredObj; // this objects is hovered at the moment
+
+    // tooltip will not appear immediately. If object was hovered shortly,
+    // - the timer will be canceled and tooltip will not appear at all.
+    var tooltipDisplayTimeout;
+
+    // This will move tooltip to the current mouse position and show it by timer.
+    function showTooltip() {
+        var divElement = document.getElementById("tooltip");
+
+        if (divElement && latestMouseProjection) {
+            divElement.style.display = "block";
+            divElement.style.opacity = 0.0;
+
+            var canvasHalfWidth = renderer.domElement.offsetWidth / 2;
+            var canvasHalfHeight = renderer.domElement.offsetHeight / 2;
+
+            var tooltipPosition = latestMouseProjection.clone().project(camera);
+            tooltipPosition.x = (tooltipPosition.x * canvasHalfWidth) + canvasHalfWidth + renderer.domElement.offsetLeft;
+            tooltipPosition.y = -(tooltipPosition.y * canvasHalfHeight) + canvasHalfHeight + renderer.domElement.offsetTop;
+
+            var tootipWidth = divElement.offsetWidth;
+            var tootipHeight = divElement.offsetHeight;
+
+            divElement.style.left = `${tooltipPosition.x - tootipWidth/2}px`;
+            divElement.style.top = `${tooltipPosition.y - tootipHeight - 5}px`;
+
+            // var position = new THREE.Vector3();
+            // var quaternion = new THREE.Quaternion();
+            // var scale = new THREE.Vector3();
+            // hoveredObj.matrix.decompose(position, quaternion, scale);
+            divElement.innerText = hoveredObj.userData.tooltipText;
+
+            setTimeout(function() {
+                divElement.style.opacity = 1.0;
+            }, 25);
+        }
+    }
+
+    // This will immediately hide tooltip.
+    function hideTooltip() {
+        var divElement = document.getElementById("tooltip");
+        if (divElement) {
+            divElement.style.display = "none";
+        }
+    }
+
+    // Following two functions will convert mouse coordinates
+    // from screen to three.js system (where [0,0] is in the middle of the screen)
+    function updateMouseCoords(event, coordsObj) {
+        coordsObj.x = ((event.clientX - renderer.domElement.offsetLeft) / renderer.domElement.offsetWidth) * 2 - 1;
+        coordsObj.y = ((event.clientY - renderer.domElement.offsetTop) / renderer.domElement.offsetHeight) * -2 + 1;
+    }
+
+    function handleManipulationUpdate() {
+        raycaster.setFromCamera(mouse, camera); {
+            var intersects = raycaster.intersectObjects(tooltipEnabledObjects);
+            if (intersects.length > 0) {
+                latestMouseProjection = intersects[0].point;
+                hoveredObj = intersects[0].object;
+            }
+        }
+
+        if (tooltipDisplayTimeout || !latestMouseProjection) {
+            clearTimeout(tooltipDisplayTimeout);
+            tooltipDisplayTimeout = undefined;
+            hideTooltip();
+        }
+
+        if (!tooltipDisplayTimeout && latestMouseProjection) {
+            tooltipDisplayTimeout = setTimeout(function() {
+                tooltipDisplayTimeout = undefined;
+                showTooltip();
+            }, 330);
+        }
+    }
+
+    function onMouseMove(event) {
+        updateMouseCoords(event, mouse);
+
+        latestMouseProjection = undefined;
+        hoveredObj = undefined;
+        handleManipulationUpdate(event);
+    }
+
     return <div id="three-d-view" ref={threeDViewRef}>
         <ReadCurrentTimeSubcomponent/>
         <ReadCurrentDepthsSubcomponent/>
         <ReadSelectedValuesSubcomponent/>
+        <div id="tooltip"></div>
     </div>
 }
 
