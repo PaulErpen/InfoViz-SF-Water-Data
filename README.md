@@ -16,7 +16,7 @@ npm start
 ```
 
 When you make code changes to the backend restart the server.
-When you make changes to the frontend, thats anything in the "src"-directory you need to recompile the js:
+When you make changes to the frontend, you need to recompile the js. The frontend code is located in the "src"-directory.
 ```
 npm run build
 ```
