@@ -1,6 +1,6 @@
 .active-station-dialog-wrapper {
     position: absolute;
-    z-index: 500;
+    z-index: 530;
     background: rgba(0, 0, 0, 0.514);
     width: 100vw;
     height: 100vh;
@@ -12,6 +12,7 @@
     }
 
     .active-station-dialog {
+        position: relative;
         background: white;
         border-radius: 5px;
         width: calc(100vw - 200px);

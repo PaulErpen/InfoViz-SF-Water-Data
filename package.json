@@ -1,7 +1,7 @@
 {
-  "name": "veiledning09",
+  "name": "sf-bay-water-data-viz",
   "version": "1.0.0",
-  "description": "Laget av <a href=\"http://mastermaps.com/\">Bjørn Sandvik</a>",
+  "description": "A 3D visualization of the water quality data set from San Francisco Bay.",
   "main": "server.js",
   "directories": {
     "lib": "lib"
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GeoForum/veiledning09.git"
+    "url": "https://github.com/PaulErpen/InfoViz-SF-Water-Data"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/GeoForum/veiledning09/issues"
+    "url": "https://github.com/PaulErpen/InfoViz-SF-Water-Data/issues"
   },
-  "homepage": "https://github.com/GeoForum/veiledning09#readme",
+  "homepage": "https://github.com/PaulErpen/InfoViz-SF-Water-Data/blob/master/README.md",
   "dependencies": {
     "express": "^4.17.1",
     "react": "^17.0.2",

@@ -1,0 +1,13 @@
+.legend {
+    .legend-item {
+        margin-bottom: 5px;
+        
+        .color-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            display: inline-block;
+            vertical-align: text-bottom;
+        }
+    }
+}
